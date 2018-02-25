@@ -1,6 +1,7 @@
 'use strict';
 
 var request = require('request');
+const COIN = 100000000; // constant that defines number of Satoshis per BTC
 
 class WebAPI {
     constructor() {
@@ -40,6 +41,18 @@ class WebAPI {
                     number: result.height,
                     time: result.time
                 })
+            })
+        })
+    }
+
+    getBalance(addr) {
+        var url = this.api + this.network + '/addrs/' + addr + '/balance';
+
+        return new Promise((resolve, reject) => {
+            request(url, (err, res, body) => {
+                if (err) reject(err);
+                var result = JSON.parse(body);
+                resolve(result.balance / COIN);
             })
         })
     }

@@ -11,16 +11,17 @@ $("#new-wallet-form").on('submit', function(e) {
     e.preventDefault(e);
     var network = $('input[name=network]:checked').val();
 
-    //TODO: Create New Wallet
-
-    $('#new-wallet-form')[0].reset();
-    $('#new-wallet').hide();
-    $('#output-area').html(generateNewWalletInfo());
+    bitcoin.createWallet(network).then(function(wallet) {
+        $('#new-wallet-form')[0].reset();
+        $('#new-wallet').hide();
+        $('#output-area').html(generateNewWalletInfo());
+    });
 })
 
 // New wallet confirmation button click
 $('#output-area').on('click', '#confirm-key', function(e) {
     $('#output-area').html(generateWalletUI());
+    updateBtcBalance();
 })
 
 
@@ -48,11 +49,18 @@ $('#old-wallet-form').on('submit', function(e) {
     e.preventDefault(e);
     var key = $('input[name="cipher"]').val();
 
-    //TODO: Import wallet from key
-
-    $('#old-wallet-form')[0].reset();
-    $('#old-wallet').hide();
-    $('#output-area').html(generateWalletUI());
+    bitcoin.createWallet("", key).then(function(wallet) {
+        if (wallet.privateKey === key) {
+            $('#old-wallet-form')[0].reset();
+            $('#old-wallet').hide();
+            $('#output-area').html(generateWalletUI());
+            updateBtcBalance();
+        } else {
+            displayAlert("danger", "Not a valid key, only WIF-compressed format is supported!");
+        }
+    }).catch(function(err) {
+        displayAlert("danger", "Not a valid key, only WIF-compressed format is supported!");
+    });
 })
 
 //==============================
@@ -73,7 +81,7 @@ function generateNewWalletInfo() {
     //TODO: display real private key
     var html = `
         <h4>Save your private key and DO NOT lose it!</h4>
-        <div class='key-info'>1234</div>
+        <div class='key-info'>${bitcoin.getWallet().privateKey}</div>
         <button id='confirm-key' type='submit' class='btn btn-secondary'>Ok, got it!</button>
     `;
     return html;
@@ -84,7 +92,7 @@ function generateWalletUI() {
     //TODO: Display actualy balance and address
     var html = `
         <h5 id='btc-balance'>Balance: 0</h5>
-        <h5>Address: 0x123456789</h5>
+        <h5>Address: ${bitcoin.getWallet().address}</h5>
         <h5>Send Transaction</h5>
         <form id='tx-form'>
             <div class='form-group'>
@@ -96,4 +104,10 @@ function generateWalletUI() {
     `;
 
     return html;
+}
+
+function updateBtcBalance() {
+    bitcoin.getBalance().then(function(balance) {
+        $('#btc-balance').html("Balance: " + balance + " BTC");
+    })
 }
