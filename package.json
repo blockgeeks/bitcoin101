@@ -13,7 +13,8 @@
     "get-random-values": "^1.2.0",
     "ecurve": "^1.0.6",
     "bigi": "^1.1.0",
-    "bs58": "^4.0.1"
+    "bs58": "^4.0.1",
+    "eccrypto": "^1.0.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

@@ -32,9 +32,24 @@ $('#output-area').on('click', '#tx-form button', function(e) {
     var amount = $('input[name="btc"]').val();
     var addr = $('input[name="addr"]').val();
 
-    //TODO: send actual transaction
+    if (amount <= 0 || Number.isNaN(amount)) {
+        displayAlert("danger", "Please enter valid amount!");
+        return;
+    }
 
-    displayAlert("danger", "Unable to send " + amount + " to " + addr);
+    bitcoin.getBalance().then(function(balance) {
+        if (amount > balance) {
+            displayAlert("danger", "Not enough bitcoin in account!");
+        } else {
+            return bitcoin.sendBitcoin(amount, addr);
+        }
+    }).then(function(result) {
+        displayAlert("success", "Success! TX ID: " + result);
+        $('#tx-form')[0].reset();
+    }).catch(function(err){
+        displayAlert("danger", "Unable to send TX!");
+        console.log(err);
+    });
 })
 
 // Import Existing Wallet button click
@@ -78,7 +93,6 @@ function displayAlert(type, msg) {
 }
 
 function generateNewWalletInfo() {
-    //TODO: display real private key
     var html = `
         <h4>Save your private key and DO NOT lose it!</h4>
         <div class='key-info'>${bitcoin.getWallet().privateKey}</div>
@@ -89,7 +103,6 @@ function generateNewWalletInfo() {
 
 
 function generateWalletUI() {
-    //TODO: Display actualy balance and address
     var html = `
         <h5 id='btc-balance'>Balance: 0</h5>
         <h5>Address: ${bitcoin.getWallet().address}</h5>

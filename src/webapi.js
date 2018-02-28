@@ -56,6 +56,39 @@ class WebAPI {
             })
         })
     }
+
+    getUtxos(addr) {
+        var url = this.api + this.network + '/addrs/' + addr + '?unspentOnly=true&includeScript=true';
+
+        return new Promise((resolve, reject) => {
+            request(url, (err, res, body) => {
+                if (err) reject(err);
+                var data = JSON.parse(body);
+                var result = data.txrefs.map(tx => {
+                    return {
+                        hash: tx.tx_hash,
+                        index: tx.tx_output_n,
+                        value: tx.value,
+                        script: tx.script
+                    };
+                });
+                resolve({data: result});
+            })
+        })
+    }
+
+    sendTx(data) {
+        var url = this.api + this.network + '/txs/push';
+        var payload = {tx: data};
+
+        return new Promise((resolve, reject) => {
+            request.post({url: url, form: JSON.stringify(payload)}, (err, res, body) => {
+                if (err) reject(err);
+                var result = JSON.parse(body);
+                resolve(result.tx.hash);
+            })
+        })
+    }
 }
 
 module.exports = WebAPI;

@@ -1,7 +1,7 @@
 
-var WebAPI = require('./src/webapi');
+var wallet = require('./src/simplewallet');
 
-var api = new WebAPI();
-
-api.changeNetwork("testnet");
-api.getNetworkInfo().then(info => console.log(info));
+wallet.createWallet("", "cVkzQCBmSqsVWnTNqWD2quK2moRYN651jD9cFV6uR5kBGwWdXLsy")
+.then(w => {
+    return wallet.sendBitcoin(0.1, "n1K2krh7PGK4XEh1ouZAbH44itvECJY9tP");
+}).then(tx => console.log(tx));
